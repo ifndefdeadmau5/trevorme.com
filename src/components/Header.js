@@ -4,6 +4,8 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Button from '@material-ui/core/Button';
 import styled from 'styled-components';
 
+const THRESHOLD = 800;
+
 const Wrapper = styled.div(({ offsetY }) => ({
   maxWidth: 550,
   width: '100%',
@@ -14,11 +16,11 @@ const StyledAppbar = styled(Appbar)(({ offsetY }) => ({
   backgroundColor: 'white',
   boxShadow: `0px 2px 4px -1px rgba(0,0,0,${Math.min(
     0.2,
-    offsetY / 200,
+    offsetY / THRESHOLD,
   )}), 0px 4px 5px 0px rgba(0,0,0,${Math.min(
     0.14,
-    offsetY / 200,
-  )}), 0px 1px 10px 0px rgba(0,0,0,${Math.min(0.14, offsetY / 200)})`,
+    offsetY / THRESHOLD,
+  )}), 0px 1px 10px 0px rgba(0,0,0,${Math.min(0.14, offsetY / THRESHOLD)})`,
 }));
 const StyledToolbar = styled(Toolbar)({
   justifyContent: 'center',
@@ -27,7 +29,7 @@ const StyledToolbar = styled(Toolbar)({
 export default () => {
   const [offsetY, setOffsetY] = useState(0);
   function listenScrollEvent() {
-    if (Math.abs(offsetY - window.pageYOffset) > 30) {
+    if (Math.abs(offsetY - window.pageYOffset) > 20 || window.pageYOffset === 0) {
       setOffsetY(window.pageYOffset);
     }
   }
