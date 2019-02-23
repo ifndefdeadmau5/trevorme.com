@@ -34,7 +34,7 @@ export default () => {
   useEffect(() => {
     window.addEventListener('scroll', listenScrollEvent);
     return () => {
-      window.addEventListener('scroll', listenScrollEvent);
+      window.removeEventListener('scroll', listenScrollEvent);
     };
   });
 
