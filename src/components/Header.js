@@ -6,14 +6,14 @@ import styled from 'styled-components';
 
 const THRESHOLD = 800;
 
-const Wrapper = styled.div(({ offsetY }) => ({
+const Wrapper = styled.div({
   maxWidth: 550,
   width: '100%',
   display: 'flex',
   justifyContent: 'space-between',
-}));
-const StyledAppbar = styled(Appbar)(({ offsetY }) => ({
-  backgroundColor: 'white',
+});
+const StyledAppbar = styled(({ offsetY, ...rest }) => <Appbar {...rest} />)(({ offsetY, theme }) => ({
+  backgroundColor: `rgba(255, 255, 255, ${offsetY/100})`,
   boxShadow: `0px 2px 4px -1px rgba(0,0,0,${Math.min(
     0.2,
     offsetY / THRESHOLD,
@@ -21,6 +21,10 @@ const StyledAppbar = styled(Appbar)(({ offsetY }) => ({
     0.14,
     offsetY / THRESHOLD,
   )}), 0px 1px 10px 0px rgba(0,0,0,${Math.min(0.14, offsetY / THRESHOLD)})`,
+  transition: theme.transitions.create(['background-color', 'box-shadow'], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.shortest,
+  }),
 }));
 const StyledToolbar = styled(Toolbar)({
   justifyContent: 'center',
@@ -29,7 +33,7 @@ const StyledToolbar = styled(Toolbar)({
 export default () => {
   const [offsetY, setOffsetY] = useState(0);
   function listenScrollEvent() {
-    if (Math.abs(offsetY - window.pageYOffset) > 20 || window.pageYOffset === 0) {
+    if (Math.abs(offsetY - window.pageYOffset) > 30 || window.pageYOffset === 0) {
       setOffsetY(window.pageYOffset);
     }
   }
