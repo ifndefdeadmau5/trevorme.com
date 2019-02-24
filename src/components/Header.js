@@ -55,7 +55,7 @@ export default ({ onSelect }) => {
         <Wrapper>
           <Button onClick={handleClick(0)}>Home</Button>
           <div>
-            <Button>Blog</Button>
+            <Button disabled>Blog</Button>
             <Button onClick={handleClick(1)}>OSS</Button>
           </div>
         </Wrapper>

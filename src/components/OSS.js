@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
 import styled from 'styled-components';
 import axios from 'axios';
 import SimpleList from './SimpleList';
@@ -7,27 +9,38 @@ const Root = styled.div({
   marginTop: 64,
 });
 
-function stripCommitMessage(message) {
-  if(message.includes('\n')) {
-      return message.substring(0, message.indexOf('\n'))
-  }
-  return message;
-}
-
+const MarginedDivider = styled(Divider)(({ theme }) => ({
+  marginTop: theme.spacing(4),
+  marginBottom: theme.spacing(4),
+}));
 
 export default ({ className }) => {
-  const [commits, setCommits] = useState(null);
+  const [groups, setGroups] = useState(null);
 
   async function fetchData() {
-    const { data } = await axios.get(
-      'https://api.github.com/repos/mui-org/material-ui/commits?author=ifndefdeadmau5',
+    const {
+      data: { items },
+    } = await axios.get(
+      'https://api.github.com/search/issues?q=type:pr+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+author:ifndefdeadmau5',
+
+      // Below searches all PR contributions among public repositories except mines
+      // 'https://api.github.com/search/issues?q=type:pr+is:public+author:ifndefdeadmau5+-user:ifndefdeadmau5',
     );
-    setCommits(
-      data.map(({ commit, html_url }) => ({
-        text: stripCommitMessage(commit.message),
-        link: html_url,
-      })),
-    );
+
+    const groups = items.reduce((acc, curr) => {
+      const key = 'repository_url';
+      const group = acc[curr[key]];
+      const item = {
+        text: curr.title.trim(),
+        link: curr.html_url,
+      };
+      return {
+        ...acc,
+        [curr[key]]: group ? [...group, item] : [item],
+      };
+    }, {});
+
+    setGroups(groups);
   }
   useEffect(() => {
     fetchData();
@@ -35,7 +48,19 @@ export default ({ className }) => {
 
   return (
     <Root className={className}>
-      {commits && <SimpleList commits={commits} />}
+      <Typography variant="subtitle1">
+        These are all the OSS contributions I've been made so far
+      </Typography>
+      {groups &&
+        Object.keys(groups).map((key, i, { length }) => (
+          <React.Fragment key={key}>
+            <Typography variant="h3" gutterBottom>
+              {key.substring(29)}
+            </Typography>
+            {<SimpleList items={groups[key]} />}
+            {length - 1 !== i && <MarginedDivider />}
+          </React.Fragment>
+        ))}
     </Root>
   );
 };

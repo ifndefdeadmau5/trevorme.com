@@ -14,12 +14,12 @@ function ListItemLink(props) {
 }
 
 export default props => {
-  const { commits } = props;
+  const { items } = props;
   return (
     <Paper>
       <List component="nav">
-        {commits.map(({ text, link }) => (
-          <ListItemLink href={link}>
+        {items.map(({ text, link }) => (
+          <ListItemLink key={link} href={link}>
             <StyledListItemText primary={text} />
           </ListItemLink>
         ))}
