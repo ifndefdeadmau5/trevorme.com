@@ -22,7 +22,7 @@ const StyledToolbar = styled(Toolbar)({
   justifyContent: 'center',
 });
 
-export default () => {
+export default ({ onSelect }) => {
   const [offsetY, setOffsetY] = useState(0);
   function listenScrollEvent() {
     if (Math.abs(offsetY - window.pageYOffset) > 30 || window.pageYOffset === 0) {
@@ -35,6 +35,10 @@ export default () => {
       window.removeEventListener('scroll', listenScrollEvent);
     };
   });
+
+  const handleClick = (index) => () => {
+    onSelect(index);
+  }
 
   return (
     <StyledAppBar style={{
@@ -49,10 +53,10 @@ export default () => {
     }}>
       <StyledToolbar>
         <Wrapper>
-          <Button>Home</Button>
+          <Button onClick={handleClick(0)}>Home</Button>
           <div>
             <Button>Blog</Button>
-            <Button>OSS</Button>
+            <Button onClick={handleClick(1)}>OSS</Button>
           </div>
         </Wrapper>
       </StyledToolbar>
