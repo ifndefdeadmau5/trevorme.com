@@ -14,6 +14,8 @@ const MarginedDivider = styled(Divider)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
+const USER_NAME = 'ifndefdeadmau5'
+
 export default ({ className }) => {
   const [groups, setGroups] = useState(null);
 
@@ -24,7 +26,7 @@ export default ({ className }) => {
       'https://api.github.com/search/issues?q=type:pr+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+author:ifndefdeadmau5',
 
       // Below searches all PR contributions among public repositories except mines
-      // 'https://api.github.com/search/issues?q=type:pr+is:public+author:ifndefdeadmau5+-user:ifndefdeadmau5',
+      // `https://api.github.com/search/issues?q=type:pr+is:public+author:${USER_NAME}+-user:${USER_NAME}`,
     );
 
     const groups = items.reduce((acc, curr) => {
