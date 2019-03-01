@@ -1,6 +1,5 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
-import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import GitHub from '../svgs/GitHub';
 import LinkedIn from '../svgs/LinkedIn';
