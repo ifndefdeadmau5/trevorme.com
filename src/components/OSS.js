@@ -3,7 +3,10 @@ import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import styled from 'styled-components';
 import axios from 'axios';
+import ContentLoader from '../components/ContentLoader';
+
 import SimpleList from './SimpleList';
+
 
 const Root = styled.div({
   marginTop: 64,
@@ -14,7 +17,7 @@ const MarginedDivider = styled(Divider)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
-const USER_NAME = 'ifndefdeadmau5'
+const USER_NAME = 'ifndefdeadmau5';
 
 export default ({ className }) => {
   const [groups, setGroups] = useState(null);
@@ -53,7 +56,7 @@ export default ({ className }) => {
       <Typography variant="subtitle1">
         These are all the OSS contributions I've been made so far
       </Typography>
-      {groups &&
+      {groups ? (
         Object.keys(groups).map((key, i, { length }) => (
           <React.Fragment key={key}>
             <Typography variant="h3" gutterBottom>
@@ -62,7 +65,12 @@ export default ({ className }) => {
             {<SimpleList items={groups[key]} />}
             {length - 1 !== i && <MarginedDivider />}
           </React.Fragment>
-        ))}
+        ))
+      ) : (
+        <React.Fragment>{
+          Array.from({ length: 5 }).map((v, i) => <ContentLoader key={i} />)
+        }</React.Fragment>
+      )}
     </Root>
   );
 };

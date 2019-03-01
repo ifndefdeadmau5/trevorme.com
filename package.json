@@ -6,6 +6,7 @@
     "@material-ui/core": "v4.0.0-alpha.1",
     "axios": "^0.18.0",
     "react": "^16.8.3",
+    "react-content-loader": "^4.0.1",
     "react-dom": "^16.8.3",
     "react-jss": "^8.6.1",
     "react-scripts": "2.1.5",
