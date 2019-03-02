@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
+import Paper from '@material-ui/core/Paper';
+import Collapse from '@material-ui/core/Collapse';
 import styled from 'styled-components';
 import axios from 'axios';
 import RepositoryInfo from '../components/RepositoryInfo';
@@ -12,21 +14,35 @@ const Root = styled.div({
   marginTop: 64,
 });
 
-const MarginedDivider = styled(Divider)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  marginBottom: theme.spacing(4),
+const Wrapper = styled(Paper)(({ theme }) => ({
+  marginBottom: 24,
+  transition: theme.transitions.create(['background-color', 'box-shadow'], {
+    easing: theme.transitions.easing.easeInOut,
+    duration: theme.transitions.duration.standard,
+  }),
 }));
 
-// const USER_NAME = 'ifndefdeadmau5';
+const MarginedDivider = styled(Divider)(({ theme }) => ({
+  marginTop: theme.spacing(6),
+  marginBottom: theme.spacing(6),
+}));
+
+const USER_NAME = 'ifndefdeadmau5';
 
 export default ({ className }) => {
   const [groups, setGroups] = useState(null);
+  const [openID, setOpenID] = useState(null);
+  const [isHovering, setIsHovering] = useState(false);
 
   async function fetchData() {
     const {
       data: { items },
     } = await axios.get(
       'https://api.github.com/search/issues?q=type:pr+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+author:ifndefdeadmau5',
+      // 'https://api.github.com/search/issues?q=type:pr+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+author:ifndefdeadmau5',
+      // 'https://api.github.com/search/commits?q=type:pr+is:merged+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+author:ifndefdeadmau5', { headers: { accept: 'application/vnd.github.cloak-preview' } }
+      // Below uses github's new search api
+      // 'https://api.github.com/search/commits?q=repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+author:ifndefdeadmau5', { headers: { accept: 'application/vnd.github.cloak-preview' } }
 
       // Below searches all PR contributions among public repositories except mines
       // `https://api.github.com/search/issues?q=type:pr+is:public+author:${USER_NAME}+-user:${USER_NAME}`,
@@ -49,9 +65,15 @@ export default ({ className }) => {
     for (const group of Object.entries(groups)) {
       const [repoName] = group;
       const {
-        data: { owner },
+        data: {
+          owner: { avatar_url },
+          html_url,
+          stargazers_count,
+        },
       } = await axios.get(`https://api.github.com/repos/${repoName}`);
-      groups[repoName].avatarUrl = owner.avatar_url;
+      groups[repoName].avatarUrl = avatar_url;
+      groups[repoName].repoUrl = html_url;
+      groups[repoName].stars = stargazers_count;
     }
 
     setGroups(groups);
@@ -59,6 +81,14 @@ export default ({ className }) => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleRepoClick = key => event => {
+    if (key === openID) {
+      console.log('clicked same item');
+      setOpenID(null);
+    }
+    setOpenID(key);
+  };
 
   return (
     <Root className={className}>
@@ -68,9 +98,25 @@ export default ({ className }) => {
       {groups ? (
         Object.keys(groups).map((key, i, { length }) => (
           <React.Fragment key={key}>
-            <RepositoryInfo src={groups[key].avatarUrl} name={key} />
-            {<SimpleList items={groups[key]} />}
-            {length - 1 !== i && <MarginedDivider />}
+            <Wrapper
+              // onMouseEnter={() => setIsHovering(true)}
+              // onMouseLeave={() => setIsHovering(false)}
+              // elevation={key === openID && isHovering ? 8 : 2}
+              elevation={key === openID ? 8 : 2}
+            >
+              <RepositoryInfo
+                onClick={handleRepoClick(key)}
+                src={groups[key].avatarUrl}
+                name={key}
+                url={groups[key].repoUrl}
+                stars={groups[key].stars}
+              />
+              <Divider />
+              <Collapse in={key === openID} timeout="auto" unmountOnExit>
+                <SimpleList items={groups[key]} />
+              </Collapse>
+              {/* {length - 1 !== i && <MarginedDivider />} */}
+            </Wrapper>
           </React.Fragment>
         ))
       ) : (
