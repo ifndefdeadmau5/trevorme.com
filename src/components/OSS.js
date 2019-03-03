@@ -12,19 +12,16 @@ import SimpleList from './SimpleList';
 
 const Root = styled.div({
   marginTop: 64,
+  minWidth: 800,
 });
 
-const Wrapper = styled(Paper)(({ theme }) => ({
+const Wrapper = styled(Paper)(({ theme, selected }) => ({
   marginBottom: 24,
-  transition: theme.transitions.create(['background-color', 'box-shadow'], {
+  width: 800,
+  transition: theme.transitions.create(['box-shadow', 'transform'], {
     easing: theme.transitions.easing.easeInOut,
     duration: theme.transitions.duration.standard,
   }),
-}));
-
-const MarginedDivider = styled(Divider)(({ theme }) => ({
-  marginTop: theme.spacing(6),
-  marginBottom: theme.spacing(6),
 }));
 
 const USER_NAME = 'ifndefdeadmau5';
@@ -32,13 +29,12 @@ const USER_NAME = 'ifndefdeadmau5';
 export default ({ className }) => {
   const [groups, setGroups] = useState(null);
   const [openID, setOpenID] = useState(null);
-  const [isHovering, setIsHovering] = useState(false);
 
   async function fetchData() {
     const {
       data: { items },
     } = await axios.get(
-      'https://api.github.com/search/issues?q=type:pr+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+author:ifndefdeadmau5',
+      'https://api.github.com/search/issues?q=type:pr+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+repo:mdx-js/mdx+author:ifndefdeadmau5',
       // 'https://api.github.com/search/issues?q=type:pr+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+author:ifndefdeadmau5',
       // 'https://api.github.com/search/commits?q=type:pr+is:merged+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+author:ifndefdeadmau5', { headers: { accept: 'application/vnd.github.cloak-preview' } }
       // Below uses github's new search api
@@ -82,43 +78,35 @@ export default ({ className }) => {
     fetchData();
   }, []);
 
-  const handleRepoClick = key => event => {
+  const handleClick = key => event => {
     if (key === openID) {
-      console.log('clicked same item');
       setOpenID(null);
+    } else {
+      setOpenID(key);
     }
-    setOpenID(key);
   };
 
   return (
     <Root className={className}>
-      <Typography variant="subtitle1">
-        These are all the OSS contributions I've been made so far
-      </Typography>
       {groups ? (
-        Object.keys(groups).map((key, i, { length }) => (
-          <React.Fragment key={key}>
-            <Wrapper
-              // onMouseEnter={() => setIsHovering(true)}
-              // onMouseLeave={() => setIsHovering(false)}
-              // elevation={key === openID && isHovering ? 8 : 2}
-              elevation={key === openID ? 8 : 2}
-            >
+        Object.keys(groups).map((key, i, { length }) => {
+          const selected = key === openID;
+          return (
+            <Wrapper key={key} elevation={selected ? 8 : 2} selected={selected}>
               <RepositoryInfo
-                onClick={handleRepoClick(key)}
+                onClick={handleClick(key)}
                 src={groups[key].avatarUrl}
                 name={key}
                 url={groups[key].repoUrl}
                 stars={groups[key].stars}
               />
               <Divider />
-              <Collapse in={key === openID} timeout="auto" unmountOnExit>
+              <Collapse in={selected} timeout="auto" unmountOnExit>
                 <SimpleList items={groups[key]} />
               </Collapse>
-              {/* {length - 1 !== i && <MarginedDivider />} */}
             </Wrapper>
-          </React.Fragment>
-        ))
+          );
+        })
       ) : (
         <React.Fragment>
           {Array.from({ length: 5 }).map((v, i) => (

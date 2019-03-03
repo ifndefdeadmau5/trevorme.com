@@ -17,29 +17,33 @@ const Main = styled.div({
 const MarginContainer = styled.div({
   marginTop: 64,
   marginBottom: 64,
-  maxWidth: 550,
   marginLeft: 'auto',
   marginRight: 'auto',
 });
+const ContentWrapper = styled.div({
+  width: 550,
+})
 
 export default () => {
-  const [page, setPage] = useState(PAGE_HOME);
+  const [page, setPage] = useState(PAGE_OSS);
   return (
     <div>
       <Header onSelect={setPage} />
       <Main>
         <MarginContainer>
           {page === PAGE_HOME && (
-            <Typography>
-              {Array.apply(null, Array(50))
-                .map(
-                  () => `Cras mattis consectetur purus sit amet fermentum.
+            <ContentWrapper>
+              <Typography>
+                {Array.apply(null, Array(50))
+                  .map(
+                    () => `Cras mattis consectetur purus sit amet fermentum.
 Cras justo odio, dapibus ac facilisis in, egestas eget quam.
 Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
 Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`,
-                )
-                .join('\n')}
-            </Typography>
+                  )
+                  .join('\n')}
+              </Typography>
+            </ContentWrapper>
           )}
           {page === PAGE_OSS && <OSS />}
         </MarginContainer>
