@@ -10,6 +10,7 @@ const Root = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   cursor: 'pointer',
+  width: '100%',
 }));
 
 const Wrapper = styled.div(({ theme }) => ({

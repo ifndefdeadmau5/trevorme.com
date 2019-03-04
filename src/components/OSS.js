@@ -5,6 +5,9 @@ import Paper from '@material-ui/core/Paper';
 import Collapse from '@material-ui/core/Collapse';
 import styled from 'styled-components';
 import axios from 'axios';
+import Transition from 'react-transition-group/Transition';
+import TransitionGroup from 'react-transition-group/TransitionGroup';
+import anime from 'animejs';
 import RepositoryInfo from '../components/RepositoryInfo';
 import ContentLoader from '../components/ContentLoader';
 
@@ -26,6 +29,40 @@ const Wrapper = styled(Paper)(({ theme, selected }) => ({
 
 const USER_NAME = 'ifndefdeadmau5';
 
+const createOpacityAnimationConfig = animatingIn => ({
+  value: animatingIn ? [0, 1] : 0,
+  easing: 'linear',
+  duration: 300,
+});
+
+const ANIMATION_DONE_EVENT = 'animation::done';
+
+const triggerAnimationDoneEvent = node =>
+  node.dispatchEvent(new Event(ANIMATION_DONE_EVENT));
+
+const easing = 'spring(1, 150, 10)';
+
+const animateRepoIn = repo =>
+  anime
+    .timeline()
+    .add({
+      targets: repo,
+      translateX: [2000, 0],
+      opacity: createOpacityAnimationConfig(true),
+      easing,
+    })
+    .add(
+      {
+        targets: repo.querySelectorAll('.card'),
+        easing,
+        opacity: createOpacityAnimationConfig(true),
+        translateY: [100, 0],
+        complete: () => triggerAnimationDoneEvent(repo),
+        delay: anime.stagger(70),
+      },
+      '-=1000',
+    );
+
 export default ({ className }) => {
   const [groups, setGroups] = useState(null);
   const [openID, setOpenID] = useState(null);
@@ -34,14 +71,13 @@ export default ({ className }) => {
     const {
       data: { items },
     } = await axios.get(
-      'https://api.github.com/search/issues?q=type:pr+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+repo:mdx-js/mdx+author:ifndefdeadmau5',
-      // 'https://api.github.com/search/issues?q=type:pr+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+author:ifndefdeadmau5',
-      // 'https://api.github.com/search/commits?q=type:pr+is:merged+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+author:ifndefdeadmau5', { headers: { accept: 'application/vnd.github.cloak-preview' } }
-      // Below uses github's new search api
+      // 'https://api.github.com/search/issues?q=type:pr+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+repo:mdx-js/mdx+author:ifndefdeadmau5',
+
+      // Below uses github's new search api(commits)
       // 'https://api.github.com/search/commits?q=repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+author:ifndefdeadmau5', { headers: { accept: 'application/vnd.github.cloak-preview' } }
 
       // Below searches all PR contributions among public repositories except mines
-      // `https://api.github.com/search/issues?q=type:pr+is:public+author:${USER_NAME}+-user:${USER_NAME}`,
+      `https://api.github.com/search/issues?q=type:pr+is:public+author:${USER_NAME}+-user:${USER_NAME}`,
     );
 
     const groups = items.reduce((acc, curr) => {
@@ -92,19 +128,32 @@ export default ({ className }) => {
         Object.keys(groups).map((key, i, { length }) => {
           const selected = key === openID;
           return (
-            <Wrapper key={key} elevation={selected ? 8 : 2} selected={selected}>
-              <RepositoryInfo
-                onClick={handleClick(key)}
-                src={groups[key].avatarUrl}
-                name={key}
-                url={groups[key].repoUrl}
-                stars={groups[key].stars}
-              />
-              <Divider />
-              <Collapse in={selected} timeout="auto" unmountOnExit>
-                <SimpleList items={groups[key]} />
-              </Collapse>
-            </Wrapper>
+            <Transition
+              in={selected}
+              timeout={1000}
+              onEnter={animateRepoIn}
+            >
+              {state => (
+                <Wrapper
+                  key={key}
+                  elevation={selected ? 8 : 0}
+                  selected={selected}
+                >
+                  <RepositoryInfo
+                    onClick={handleClick(key)}
+                    src={groups[key].avatarUrl}
+                    name={key}
+                    url={groups[key].repoUrl}
+                    stars={groups[key].stars}
+                  />
+                  <span>{state}</span>
+                  <Divider />
+                  <Collapse in={selected} timeout="auto" unmountOnExit>
+                    <SimpleList items={groups[key]} />
+                  </Collapse>
+                </Wrapper>
+              )}
+            </Transition>
           );
         })
       ) : (
