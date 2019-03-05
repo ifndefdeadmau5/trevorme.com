@@ -1,15 +1,28 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useSprings, animated, interpolate, config } from 'react-spring';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
 import Collapse from '@material-ui/core/Collapse';
 import styled from 'styled-components';
 import axios from 'axios';
-import { useSpring, animated, interpolate, useTransition } from 'react-spring';
 import RepositoryInfo from '../components/RepositoryInfo';
 import ContentLoader from '../components/ContentLoader';
 
 import SimpleList from './SimpleList';
+
+const fn = (order, down, originalIndex, curIndex, y) => index =>
+  down && index === originalIndex
+    ? {
+        y: curIndex * 149 + y,
+        immediate: n => n === 'y' || n === 'zIndex',
+        config: config.stiff,
+      }
+    : {
+        y: order.indexOf(index) * 149,
+        immediate: false,
+        config: config.stiff,
+      };
 
 const Root = styled.div({
   marginTop: 64,
@@ -17,7 +30,6 @@ const Root = styled.div({
 });
 
 const Container = styled.div({
-  display: 'flex',
 });
 
 // const Left = styled.div(({ hasDetail, theme }) => ({
@@ -33,6 +45,8 @@ const Wrapper = styled(Paper)(({ theme, selected }) => ({
     duration: theme.transitions.duration.standard,
   }),
 }));
+
+const AnimatedWrapper = animated(Wrapper);
 
 const USER_NAME = 'ifndefdeadmau5';
 
@@ -96,51 +110,11 @@ export default ({ className }) => {
     }
   };
 
-  const props = useSpring({
-    width: openID ? '50%' : '100%',
-    marginRight: openID ? 16 : 0,
-  });
-
-  // const transitions = useTransition(index, p => p, {
-  //   from: { opacity: 0, transform: 'translate3d(100%,0,0)' },
-  //   enter: { opacity: 1, transform: 'translate3d(0%,0,0)' },
-  //   leave: { opacity: 0, transform: 'translate3d(-50%,0,0)' },
-  // })
-
-  const items = groups
-    ? Object.keys(groups).map((key, i, { length }) => {
-        const selected = key === openID;
-        return (
-          <Wrapper
-            // onClick={onClick}
-            key={key}
-            elevation={selected ? 8 : 2}
-            selected={selected}
-          >
-            <RepositoryInfo
-              onClick={handleClick(key)}
-              src={groups[key].avatarUrl}
-              name={key}
-              url={groups[key].repoUrl}
-              stars={groups[key].stars}
-            />
-            <Divider />
-            <Collapse in={selected} timeout="auto" unmountOnExit>
-              <SimpleList items={groups[key]} />
-            </Collapse>
-          </Wrapper>
-        );
-      })
-    : [];
-
-  console.log(items);
-
   return (
     <Root className={className}>
       {groups ? (
         <Container hasDetail={openID}>
-          <animated.div style={props}>{items}</animated.div>
-          <div>{openID && items.find(item => item.key === openID)}</div>
+          <List groups={groups} />
         </Container>
       ) : (
         <React.Fragment>
@@ -150,5 +124,53 @@ export default ({ className }) => {
         </React.Fragment>
       )}
     </Root>
+  );
+};
+
+const List = ({ groups }) => {
+  console.log('groups');
+  console.log(groups);
+
+  const groupKeys = Object.keys(groups);
+  
+  const order = useRef(groupKeys.map((_, index) => index)); // Store indicies as a local ref, this represents the item order
+  const [springs, setSprings] = useSprings(groupKeys.length, fn(order.current)); // Create springs, each corresponds to an item, controlling its transform, scale, etc.
+  const selected = false;
+
+  const onClick = () => {
+    const newOrder = order.current.reverse()
+    console.log(newOrder)
+    setSprings(fn(newOrder)) // Feed springs new style data, they'll animate the view without causing a single render
+  }
+
+  return (
+    <div className="content" style={{ height: groupKeys.length * 149 }}>
+      {springs.map(({ y }, i, { length }) => {
+        const key = groupKeys[i];
+        return (
+          <AnimatedWrapper
+            onClick={onClick}
+            key={key}
+            elevation={selected ? 8 : 2}
+            selected={selected}
+            style={{
+              transform: interpolate([y], y => `translate3d(0,${y}px,0)`)
+            }}
+          >
+            <RepositoryInfo
+              // onClick={handleClick(key)}
+              src={groups[key].avatarUrl}
+              name={key}
+              url={groups[key].repoUrl}
+              stars={groups[key].stars}
+            />
+            <Divider />
+            <Collapse in={selected} timeout="auto" unmountOnExit>
+              <SimpleList items={groups[key]} />
+            </Collapse>
+          </AnimatedWrapper>
+        );
+      })}
+    </div>
   );
 };
