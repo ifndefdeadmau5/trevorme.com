@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
 import Collapse from '@material-ui/core/Collapse';
 import styled from 'styled-components';
 import axios from 'axios';
+import { useSpring, animated, interpolate, useTransition } from 'react-spring';
 import RepositoryInfo from '../components/RepositoryInfo';
 import ContentLoader from '../components/ContentLoader';
 
@@ -15,9 +16,18 @@ const Root = styled.div({
   minWidth: 800,
 });
 
+const Container = styled.div({
+  display: 'flex',
+});
+
+// const Left = styled.div(({ hasDetail, theme }) => ({
+//   marginRight: hasDetail ? theme.spacing(1) : 0,
+// }));
+
+// const CollapsibleLeft = animated(Left);
+
 const Wrapper = styled(Paper)(({ theme, selected }) => ({
   marginBottom: 24,
-  width: 800,
   transition: theme.transitions.create(['box-shadow', 'transform'], {
     easing: theme.transitions.easing.easeInOut,
     duration: theme.transitions.duration.standard,
@@ -86,27 +96,52 @@ export default ({ className }) => {
     }
   };
 
+  const props = useSpring({
+    width: openID ? '50%' : '100%',
+    marginRight: openID ? 16 : 0,
+  });
+
+  // const transitions = useTransition(index, p => p, {
+  //   from: { opacity: 0, transform: 'translate3d(100%,0,0)' },
+  //   enter: { opacity: 1, transform: 'translate3d(0%,0,0)' },
+  //   leave: { opacity: 0, transform: 'translate3d(-50%,0,0)' },
+  // })
+
+  const items = groups
+    ? Object.keys(groups).map((key, i, { length }) => {
+        const selected = key === openID;
+        return (
+          <Wrapper
+            // onClick={onClick}
+            key={key}
+            elevation={selected ? 8 : 2}
+            selected={selected}
+          >
+            <RepositoryInfo
+              onClick={handleClick(key)}
+              src={groups[key].avatarUrl}
+              name={key}
+              url={groups[key].repoUrl}
+              stars={groups[key].stars}
+            />
+            <Divider />
+            <Collapse in={selected} timeout="auto" unmountOnExit>
+              <SimpleList items={groups[key]} />
+            </Collapse>
+          </Wrapper>
+        );
+      })
+    : [];
+
+  console.log(items);
+
   return (
     <Root className={className}>
       {groups ? (
-        Object.keys(groups).map((key, i, { length }) => {
-          const selected = key === openID;
-          return (
-            <Wrapper key={key} elevation={selected ? 8 : 2} selected={selected}>
-              <RepositoryInfo
-                onClick={handleClick(key)}
-                src={groups[key].avatarUrl}
-                name={key}
-                url={groups[key].repoUrl}
-                stars={groups[key].stars}
-              />
-              <Divider />
-              <Collapse in={selected} timeout="auto" unmountOnExit>
-                <SimpleList items={groups[key]} />
-              </Collapse>
-            </Wrapper>
-          );
-        })
+        <Container hasDetail={openID}>
+          <animated.div style={props}>{items}</animated.div>
+          <div>{openID && items.find(item => item.key === openID)}</div>
+        </Container>
       ) : (
         <React.Fragment>
           {Array.from({ length: 5 }).map((v, i) => (
