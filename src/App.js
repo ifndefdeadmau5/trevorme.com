@@ -20,6 +20,7 @@ const MarginContainer = styled.div({
   marginBottom: 64,
   marginLeft: 'auto',
   marginRight: 'auto',
+  width: '100%',
 });
 const ContentWrapper = styled.div({
   width: 550,

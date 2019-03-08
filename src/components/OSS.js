@@ -11,39 +11,26 @@ import ContentLoader from '../components/ContentLoader';
 
 import SimpleList from './SimpleList';
 
-const fn = (order, down, originalIndex, curIndex, y) => index =>
-  down && index === originalIndex
-    ? {
-        y: curIndex * 149 + y,
-        immediate: n => n === 'y' || n === 'zIndex',
-        config: config.stiff,
-      }
-    : {
-        y: order.indexOf(index) * 149,
-        immediate: false,
-        config: config.stiff,
-      };
+const fn = order => (index, a, b) => {
+  const y = order.indexOf(index) === 0 ? 0 : -90 + order.indexOf(index) * 90;
+  const x = order.indexOf(index) === 0 ? 520 : 0;
+  return { y, x, immediate: false };
+};
 
 const Root = styled.div({
   marginTop: 64,
-  minWidth: 800,
+  // minWidth: 800,
 });
 
-const Container = styled.div({
+const ListRoot = styled.div({
+  position: 'relative',
+  width: '100%',
 });
-
-// const Left = styled.div(({ hasDetail, theme }) => ({
-//   marginRight: hasDetail ? theme.spacing(1) : 0,
-// }));
-
-// const CollapsibleLeft = animated(Left);
 
 const Wrapper = styled(Paper)(({ theme, selected }) => ({
   marginBottom: 24,
-  transition: theme.transitions.create(['box-shadow', 'transform'], {
-    easing: theme.transitions.easing.easeInOut,
-    duration: theme.transitions.duration.standard,
-  }),
+  position: 'absolute',
+  width: 500,
 }));
 
 const AnimatedWrapper = animated(Wrapper);
@@ -52,7 +39,6 @@ const USER_NAME = 'ifndefdeadmau5';
 
 export default ({ className }) => {
   const [groups, setGroups] = useState(null);
-  const [openID, setOpenID] = useState(null);
 
   async function fetchData() {
     const {
@@ -102,20 +88,10 @@ export default ({ className }) => {
     fetchData();
   }, []);
 
-  const handleClick = key => event => {
-    if (key === openID) {
-      setOpenID(null);
-    } else {
-      setOpenID(key);
-    }
-  };
-
   return (
     <Root className={className}>
       {groups ? (
-        <Container hasDetail={openID}>
-          <List groups={groups} />
-        </Container>
+        <List groups={groups} />
       ) : (
         <React.Fragment>
           {Array.from({ length: 5 }).map((v, i) => (
@@ -128,37 +104,53 @@ export default ({ className }) => {
 };
 
 const List = ({ groups }) => {
-  console.log('groups');
-  console.log(groups);
-
+  const [openID, setOpenID] = useState(null);
   const groupKeys = Object.keys(groups);
-  
+  const groupKeysToIndex = groupKeys.reduce(
+    (acc, curr, i) => ({
+      ...acc,
+      [curr]: i,
+    }),
+    {},
+  );
   const order = useRef(groupKeys.map((_, index) => index)); // Store indicies as a local ref, this represents the item order
   const [springs, setSprings] = useSprings(groupKeys.length, fn(order.current)); // Create springs, each corresponds to an item, controlling its transform, scale, etc.
-  const selected = false;
 
-  const onClick = () => {
-    const newOrder = order.current.reverse()
-    console.log(newOrder)
-    setSprings(fn(newOrder)) // Feed springs new style data, they'll animate the view without causing a single render
-  }
+  const onClick = key => event => {
+    const selectedIndex = groupKeysToIndex[key];
+    const newOrder = [
+      groupKeysToIndex[key],
+      ...order.current.filter(v => v !== selectedIndex),
+    ];
+    setSprings(fn(newOrder)); // Feed springs new style data, they'll animate the view without causing a single render
+    order.current = newOrder;
+
+    if (key === openID) {
+      setOpenID(null);
+    } else {
+      setOpenID(key);
+    }
+  };
 
   return (
-    <div className="content" style={{ height: groupKeys.length * 149 }}>
-      {springs.map(({ y }, i, { length }) => {
+    <ListRoot>
+      {springs.map(({ y, x }, i, { length }) => {
         const key = groupKeys[i];
+        const selected = key === openID;
         return (
           <AnimatedWrapper
-            onClick={onClick}
             key={key}
             elevation={selected ? 8 : 2}
             selected={selected}
             style={{
-              transform: interpolate([y], y => `translate3d(0,${y}px,0)`)
+              transform: interpolate(
+                [y, x],
+                (y, x) => `translate3d(${x}px,${y}px,0)`,
+              ),
             }}
           >
             <RepositoryInfo
-              // onClick={handleClick(key)}
+              onClick={onClick(key)}
               src={groups[key].avatarUrl}
               name={key}
               url={groups[key].repoUrl}
@@ -171,6 +163,6 @@ const List = ({ groups }) => {
           </AnimatedWrapper>
         );
       })}
-    </div>
+    </ListRoot>
   );
 };

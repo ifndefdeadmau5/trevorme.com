@@ -10,6 +10,7 @@ const Root = styled.div({
   minHeight: 200,
   backgroundColor: 'white',
   borderTop: '1px solid #eeeeee',
+  width: '100%',
 });
 const IconStyle = css({
   width: 36,
