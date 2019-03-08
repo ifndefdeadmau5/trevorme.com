@@ -23,7 +23,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
 const Stargazers = styled.div({
   alignItems: 'center',
   display: 'flex',
-})
+});
 
 const ShadowAvatar = styled(Avatar)({
   border: '1px solid #b0bec5',
@@ -32,17 +32,19 @@ const ShadowAvatar = styled(Avatar)({
   height: 48,
 });
 
-export default ({ src, name, url, stars, onClick }) => (
+export default ({ src, name, url, stars, onClick, showAll }) => (
   <Root onClick={onClick}>
     <ShadowAvatar src={src} />
-    <Wrapper>
-      <StyledLink color="inherit" href={url}>
-        {name}
-      </StyledLink>
-      <Stargazers>
-        <StarRate />
-        <Typography>{stars}</Typography>
-      </Stargazers>
-    </Wrapper>
+    {showAll && (
+      <Wrapper>
+        <StyledLink color="inherit" href={url}>
+          {name}
+        </StyledLink>
+        <Stargazers>
+          <StarRate />
+          <Typography>{stars}</Typography>
+        </Stargazers>
+      </Wrapper>
+    )}
   </Root>
 );
