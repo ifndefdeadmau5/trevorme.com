@@ -1,6 +1,6 @@
 
-import React, { useState, useRef } from 'react';
-import { useSprings, animated, interpolate, config } from 'react-spring';
+import React, { useState, useRef, useEffect } from 'react';
+import { useSprings, animated, interpolate } from 'react-spring';
 import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
 import Collapse from '@material-ui/core/Collapse';
@@ -9,46 +9,53 @@ import RepositoryInfo from '../components/RepositoryInfo';
 import SimpleList from './SimpleList';
 
 const fn = order => (index, a, b) => {
-    const first = order.indexOf(index) === 0;
-    const y = first ? 0 : -90 + order.indexOf(index) * 90;
-    const x = first ? 100 : 0;
-    const width = first ? 840 : 'auto';
-    return { y, x, immediate: false, width };
+    const y = order.indexOf(index) * 90;
+    const x = 0;
+    return { y, x, immediate: false };
   };
 
   const Root = styled.div({
-    width: 1020,
+    width: 700,
   });
   
-  const Wrapper = styled(Paper)(({ theme, selected }) => ({
+  const Wrapper = styled(Paper)({
     marginBottom: 24,
     position: 'absolute',
     width: 500,
-  }));
+  });
   
 
 const AnimatedWrapper = animated(Wrapper);
 
-
 export default ({ groups }) => {
     const [openID, setOpenID] = useState(null);
     const groupKeys = Object.keys(groups);
-    const groupKeysToIndex = groupKeys.reduce(
-      (acc, curr, i) => ({
-        ...acc,
-        [curr]: i,
-      }),
-      {},
-    );
+    const groupKeysToIndex = useRef();
+    
+    useEffect(() => {
+      groupKeysToIndex.current = groupKeys.reduce(
+        (acc, curr, i) => {
+          console.log('reredner');
+          return ({
+            ...acc,
+            [curr]: i,
+          })
+        },
+        {},
+      );
+    }, []);
+
     const order = useRef(groupKeys.map((_, index) => index)); // Store indicies as a local ref, this represents the item order
     const [springs, setSprings] = useSprings(groupKeys.length, fn(order.current)); // Create springs, each corresponds to an item, controlling its transform, scale, etc.
   
     const onClick = key => event => {
-      const selectedIndex = groupKeysToIndex[key];
+      const selectedIndex = groupKeysToIndex.current[key];
       const newOrder = [
-        groupKeysToIndex[key],
+        selectedIndex,
         ...order.current.filter(v => v !== selectedIndex),
       ];
+
+      console.log(newOrder);
       setSprings(fn(newOrder)); // Feed springs new style data, they'll animate the view without causing a single render
       order.current = newOrder;
   
@@ -67,14 +74,12 @@ export default ({ groups }) => {
           return (
             <AnimatedWrapper
               key={key}
-              elevation={selected ? 8 : 2}
-              selected={selected}
+              elevation={2}
               style={{
                 transform: interpolate(
                   [y, x],
                   (y, x) => `translate3d(${x}px,${y}px,0)`,
                 ),
-                width: interpolate([width], width => width),
               }}
             >
               <RepositoryInfo

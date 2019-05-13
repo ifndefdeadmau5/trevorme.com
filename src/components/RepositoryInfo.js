@@ -35,7 +35,8 @@ const ShadowAvatar = styled(Avatar)({
 export default ({ src, name, url, stars, onClick, showAll }) => (
   <Root onClick={onClick}>
     <ShadowAvatar src={src} />
-    {showAll && (
+    {/* {showAll && ( */}
+    {true && (
       <Wrapper>
         <StyledLink color="inherit" href={url}>
           {name}

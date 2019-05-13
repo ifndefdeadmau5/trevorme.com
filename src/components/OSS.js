@@ -5,14 +5,11 @@ import ContentLoader from '../components/ContentLoader';
 import RepoList from './RepoList';
 import { blue } from '@material-ui/core/colors';
 
-
 const Root = styled.div({
   marginTop: 64,
   display: 'flex',
   justifyContent: 'center',
 });
-
-
 
 const USER_NAME = 'wojtekmaj';
 
