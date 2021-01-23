@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from "react";
-import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
 import Paper from "@material-ui/core/Paper";
 import Collapse from "@material-ui/core/Collapse";
+import { CircularProgress } from "@material-ui/core";
 import styled from "styled-components";
 import axios from "axios";
-import Transition from "react-transition-group/Transition";
-import TransitionGroup from "react-transition-group/TransitionGroup";
-import anime from "animejs";
 import RepositoryInfo from "../components/RepositoryInfo";
-import ContentLoader from "../components/ContentLoader";
-
 import SimpleList from "./SimpleList";
 
 const Root = styled.div({
   marginTop: 64,
   minWidth: 800,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexDirection: "column",
 });
 
-const Wrapper = styled(Paper)(({ theme, selected }) => ({
-  marginBottom: 24,
+const Wrapper = styled(Paper)(({ theme }) => ({
+  borderRadius: 16,
+  marginBottom: 16,
   width: 800,
   transition: theme.transitions.create(["box-shadow", "transform"], {
     easing: theme.transitions.easing.easeInOut,
@@ -29,39 +29,18 @@ const Wrapper = styled(Paper)(({ theme, selected }) => ({
 
 const USER_NAME = "ifndefdeadmau5";
 
-const createOpacityAnimationConfig = (animatingIn) => ({
-  value: animatingIn ? [0, 1] : 0,
-  easing: "linear",
-  duration: 300,
-});
+const selectedRepos = [
+  "mbrn/material-table",
+  "mui-org/material-ui",
+  "facebookincubator/fbt",
+  "chenglou/react-motion",
+  "DefinitelyTyped/DefinitelyTyped",
+  "tannerlinsley/react-virtual",
+  "apollographql/apollo-cache-persist",
+  "chromaui/learnstorybook.com",
+];
 
-const ANIMATION_DONE_EVENT = "animation::done";
-
-const triggerAnimationDoneEvent = (node) =>
-  node.dispatchEvent(new Event(ANIMATION_DONE_EVENT));
-
-const easing = 'spring(1, 150, 10)';
-
-const animateRepoIn = (repo) =>
-  anime
-    .timeline()
-    .add({
-      targets: repo,
-      translateX: [2000, 0],
-      opacity: createOpacityAnimationConfig(true),
-      easing,
-    })
-    .add(
-      {
-        targets: repo.querySelectorAll(".card"),
-        easing,
-        opacity: createOpacityAnimationConfig(true),
-        translateY: [100, 0],
-        complete: () => triggerAnimationDoneEvent(repo),
-        delay: anime.stagger(35),
-      },
-      "-=1000"
-    );
+const reposQuery = selectedRepos.map((v) => `repo:${v}`).join("+");
 
 export default ({ className }) => {
   const [groups, setGroups] = useState(null);
@@ -71,7 +50,7 @@ export default ({ className }) => {
     const {
       data: { items },
     } = await axios.get(
-      "https://api.github.com/search/issues?q=type:pr+repo:mbrn/material-table+repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+repo:mdx-js/mdx+author:ifndefdeadmau5"
+      `https://api.github.com/search/issues?q=type:pr+${reposQuery}+author:ifndefdeadmau5`
 
       // Below uses github's new search api(commits)
       // "https://api.github.com/search/commits?q=repo:mui-org/material-ui+repo:facebookincubator/fbt+repo:chenglou/react-motion+repo:milesj/aesthetic+author:ifndefdeadmau5",
@@ -111,6 +90,7 @@ export default ({ className }) => {
 
     setGroups(groups);
   }
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -129,35 +109,24 @@ export default ({ className }) => {
         Object.keys(groups).map((key, i, { length }) => {
           const selected = key === openID;
           return (
-            <Transition in={selected} timeout={500} onEnter={animateRepoIn}>
-              {(state) => (
-                <Wrapper
-                  key={key}
-                  elevation={selected ? 8 : 0}
-                  selected={selected}
-                >
-                  <RepositoryInfo
-                    onClick={handleClick(key)}
-                    src={groups[key].avatarUrl}
-                    name={key}
-                    url={groups[key].repoUrl}
-                    stars={groups[key].stars}
-                  />
-                  <Divider />
-                  <Collapse in={selected} timeout="auto" unmountOnExit>
-                    <SimpleList items={groups[key]} />
-                  </Collapse>
-                </Wrapper>
-              )}
-            </Transition>
+            <Wrapper key={key} variant="outlined" selected={selected}>
+              <RepositoryInfo
+                onClick={handleClick(key)}
+                src={groups[key].avatarUrl}
+                name={key}
+                url={groups[key].repoUrl}
+                stars={groups[key].stars}
+              />
+
+              <Collapse in={selected} timeout="auto" unmountOnExit>
+                <Divider />
+                <SimpleList items={groups[key]} />
+              </Collapse>
+            </Wrapper>
           );
         })
       ) : (
-        <React.Fragment>
-          {Array.from({ length: 5 }).map((v, i) => (
-            <ContentLoader key={i} />
-          ))}
-        </React.Fragment>
+        <CircularProgress />
       )}
     </Root>
   );

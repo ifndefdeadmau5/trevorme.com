@@ -1,16 +1,16 @@
-import React from 'react';
-import Avatar from '@material-ui/core/Avatar';
-import styled from 'styled-components';
-import Typography from '@material-ui/core/Typography';
-import Link from '@material-ui/core/Link';
-import StarRate from '@material-ui/icons/StarRate';
+import React from "react";
+import Avatar from "@material-ui/core/Avatar";
+import styled from "styled-components";
+import Typography from "@material-ui/core/Typography";
+import Link from "@material-ui/core/Link";
+import StarRate from "@material-ui/icons/StarRate";
 
 const Root = styled.div(({ theme }) => ({
   padding: theme.spacing(2),
-  display: 'flex',
-  alignItems: 'center',
-  cursor: 'pointer',
-  width: '100%',
+  display: "flex",
+  alignItems: "center",
+  cursor: "pointer",
+  width: "100%",
 }));
 
 const Wrapper = styled.div(({ theme }) => ({
@@ -22,16 +22,15 @@ const StyledLink = styled(Link)(({ theme }) => ({
 }));
 
 const Stargazers = styled.div({
-  alignItems: 'center',
-  display: 'flex',
-})
+  alignItems: "center",
+  display: "flex",
+});
 
-const ShadowAvatar = styled(Avatar)({
-  border: '1px solid #b0bec5',
-  borderRadius: 4,
+const ShadowAvatar = styled(Avatar)(({ theme }) => ({
+  border: `1px solid ${theme.palette.divider}`,
   width: 48,
   height: 48,
-});
+}));
 
 export default ({ src, name, url, stars, onClick }) => (
   <Root onClick={onClick}>

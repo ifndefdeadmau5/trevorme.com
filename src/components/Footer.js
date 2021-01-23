@@ -1,20 +1,20 @@
-import React from 'react';
-import styled, { css } from 'styled-components';
-import IconButton from '@material-ui/core/IconButton';
-import GitHub from '../svgs/GitHub';
-import LinkedIn from '../svgs/LinkedIn';
+import React from "react";
+import styled, { css } from "styled-components";
+import IconButton from "@material-ui/core/IconButton";
+import GitHub from "../svgs/GitHub";
+import LinkedIn from "../svgs/LinkedIn";
 
-const Root = styled.div({
-  display: 'flex',
-  justifyContent: 'center',
+const Root = styled.div(({ theme }) => ({
+  display: "flex",
+  justifyContent: "center",
   minHeight: 200,
-  backgroundColor: 'white',
-  borderTop: '1px solid #eeeeee',
-});
+  background: theme.palette.background.paper,
+  borderTop: "1px solid #eeeeee",
+}));
 const IconStyle = css({
   width: 36,
   height: 36,
-  fill: '#757575',
+  fill: "#757575",
 });
 
 const GitHubIcon = styled(GitHub)`
@@ -26,13 +26,13 @@ const LinkedInIcon = styled(LinkedIn)`
 
 const Container = styled.div(({ theme }) => ({
   marginTop: theme.spacing(2),
-  display: 'flex',
-  justifyContent: 'flex-end',
-  alignItems: 'flex-start',
+  display: "flex",
+  justifyContent: "flex-end",
+  alignItems: "flex-start",
   width: 550,
 }));
 
-export default props => {
+export default (props) => {
   return (
     <Root>
       <Container>
