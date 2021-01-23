@@ -3,7 +3,6 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Button from "@material-ui/core/Button";
 import styled from "styled-components";
-import { Switch } from "@material-ui/core";
 
 const THRESHOLD = 800;
 
@@ -15,7 +14,8 @@ const Wrapper = styled.div({
 });
 const StyledAppBar = styled(({ offsetY, ...rest }) => <AppBar {...rest} />)(
   ({ offsetY, theme }) => ({
-    transition: theme.transitions.create(["background-color", "box-shadow"], {
+    backgroundColor: theme.palette.background.paper,
+    transition: theme.transitions.create(["box-shadow"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.shortest,
     }),
@@ -59,7 +59,6 @@ export default ({ onSelect, setDark, children }) => {
           0.14,
           offsetY / THRESHOLD
         )})`,
-        backgroundColor: `rgba(255, 255, 255, ${offsetY / 100})`,
       }}
     >
       <StyledToolbar>
